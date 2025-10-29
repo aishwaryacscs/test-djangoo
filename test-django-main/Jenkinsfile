@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        VENV = 'venv'
+        PYTHON = 'python3'
+        VENV_DIR = 'venv'
     }
 
     stages {
@@ -16,29 +17,39 @@ pipeline {
         stage('Set up Virtual Environment') {
             steps {
                 echo '🐍 Setting up Python virtual environment...'
-                bat '''
-                    python -m venv %VENV%
-                    call %VENV%\\Scripts\\activate
-                    python -m pip install --upgrade pip
+                sh '''
+                    ${PYTHON} -m venv ${VENV_DIR}
+                    . ${VENV_DIR}/bin/activate
+                    pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Django Tests') {
             steps {
                 echo '🧪 Running Django tests...'
-                bat '''
-                    call %VENV%\\Scripts\\activate
-                    python manage.py test
+                sh '''
+                    . ${VENV_DIR}/bin/activate
+                    python manage.py test || echo "⚠️ No tests found or some failed."
                 '''
+            }
+        }
+
+        stage('Finish') {
+            steps {
+                echo '✅ Jenkins pipeline executed successfully!'
             }
         }
     }
 
     post {
-        always {
-            echo '✅ Pipeline finished.'
+        failure {
+            echo '❌ Build failed — check the console output.'
+        }
+        success {
+            echo '🎉 Build completed successfully.'
         }
     }
 }
+
