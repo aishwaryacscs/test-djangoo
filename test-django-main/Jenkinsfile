@@ -6,7 +6,7 @@ pipeline{
   stages{
     stage('Checkout Out'){
       steps{
-        git branch: 'main', url: 'https://github.com/aishwaryacscs/test-djangoo.git'
+        git branch: 'main', url: 'https://github.com/aishwaryacscs/test-djangoo'
       }
     }
     stage('Set up VENV'){
